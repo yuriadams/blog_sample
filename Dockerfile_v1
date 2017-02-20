@@ -1,0 +1,26 @@
+FROM alpine
+MAINTAINER Yuri Adams <yuriadams@gmail.com>
+
+RUN apk add --update musl-dev go git
+
+RUN mkdir /go
+ENV GOPATH /go
+
+# Copy the local package files to the container’s workspace.
+ADD . /go/src/github.com/yuriadams/blog_sample
+
+# Install our dependencies
+RUN go get github.com/julienschmidt/httprouter
+
+RUN export PATH="$PATH:$GOPATH/bin" && \
+    git config --global http.https://gopkg.in.followRedirects true
+
+# Install api binary globally within container
+RUN go install github.com/yuriadams/blog_sample
+
+WORKDIR /go/src/github.com/yuriadams/blog_sample
+
+# Set binary as entrypoint
+ENTRYPOINT /go/bin/blog_sample
+
+EXPOSE 8888

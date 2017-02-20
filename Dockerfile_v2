@@ -1,0 +1,24 @@
+FROM alpine
+
+MAINTAINER Yuri Adams <yuriadams@gmail.com>
+
+ENV GOROOT=/usr/lib/go \
+    GOPATH=/go \
+    GOBIN=/go/bin \
+    PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+WORKDIR /go/src/github.com/yuriadams/blog_sample
+ADD . /go/src/github.com/yuriadams/blog_sample
+
+RUN apk add -U git go musl-dev && \
+  go get github.com/julienschmidt/httprouter && \
+  go install github.com/yuriadams/blog_sample && \
+  apk del git go && \
+  rm -rf /go/pkg && \
+  rm -rf /go/src && \
+  rm -rf /var/cache/apk/*
+
+# Set binary as entrypoint
+ENTRYPOINT /go/bin/blog_sample
+
+EXPOSE 8888
